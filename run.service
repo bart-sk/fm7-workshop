@@ -1,0 +1,18 @@
+[Unit]
+Description=Testovanie node.js api server
+After=mongodb.service
+
+[Service]
+WorkingDirectory=/var/www/sportnet/sportnet.online/testovanie/api
+ExecStart=/usr/bin/npm run production
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nodejs-testovanie-api
+User=sportnet
+Group=sportnet
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

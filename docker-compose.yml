@@ -1,0 +1,21 @@
+version: "2"
+services:
+  app:
+    container_name: app
+    command: bash -c "cd /usr/src/app && npm run test:start"
+    depends_on:
+      - "sampleMongo"
+      - "sampleRedis"
+    image: node
+    volumes:
+     - .:/usr/src/app
+  sampleMongo:
+    container_name: sampleMongo
+    logging:
+      driver: none
+    image: mongo
+  sampleRedis:
+    container_name: sampleRedis
+    logging:
+      driver: none
+    image: redis

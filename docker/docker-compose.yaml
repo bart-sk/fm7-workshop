@@ -1,0 +1,15 @@
+version: '2'
+services:
+    mongodb:
+        image: mongo:latest
+        container_name: "mongodb"
+        restart: always
+        environment:
+          - MONGO_DATA_DIR=/data/db
+          - MONGO_LOG_DIR=/var/log/mongodb/mongo.log
+        volumes:
+          - ./mongo/data/db:/data/db
+          - ./mongo/logs:/var/log/mongodb
+        ports:
+            - 27017:27017
+        command: mongod --smallfiles --logpath=/var/log/mongodb/mongo.log
