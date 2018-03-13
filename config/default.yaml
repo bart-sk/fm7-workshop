@@ -43,8 +43,8 @@ server:
     format: combined
 
 mongodb:
-  uri: mongodb://localhost:27017/test
-  db: test
+  uri: mongodb://localhost:27017/votings
+  db: votings
 
 redis:
   port: 6379
