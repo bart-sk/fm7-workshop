@@ -3,7 +3,7 @@ info:
   version: "0.0.1"
   title: Hello World App
 # during dev, should point to your local machine
-host: localhost:10010
+host: localhost:9999
 # basePath prefixes all resource paths 
 basePath: /
 # 
@@ -18,40 +18,152 @@ consumes:
 produces:
   - application/json
 paths:
-  /hello:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
+  /votings:
+    x-swagger-router-controller: public_ctrl
     get:
-      description: Returns 'Hello' to the caller
-      # used as the method name of the controller
-      operationId: helloAction
+      description: Returns List of Votings
+      operationId: getVotings
       parameters:
-        - name: name
+        - name: offset
           in: query
-          description: The name of the person to whom to say hello
+          type: number
           required: false
-          type: string
+          default: 0
+        - name: limit
+          in: query
+          type: number
+          required: false
+          default: 20
       responses:
-        "200":
-          description: Success
+        200:
+          description: List of votings
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
-        # responses may fall through to errors
+            $ref: "#/definitions/Voting_List"
         default:
           description: Error
           schema:
             $ref: "#/definitions/Error"
+
+  /votings/{voting_id}:
+    x-swagger-router-controller: public_ctrl
+    parameters:
+      - $ref: '#/parameters/voting_id'
+    get:
+      description: Returns Voting By ID
+      operationId: getPublicVoting
+      responses:
+        200:
+          description: Fetch of Voting has been Successful
+          schema:
+            $ref: "#/definitions/Voting"
+        404:
+          description: Voting Not Found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Error"
+  
+  /voting/{voting_id}/vote:
+    x-swagger-router-controller: public_ctrl
+    parameters:
+      - $ref: '#/parameters/voting_id'
+    post:
+      description: |
+        Odoslanie odpovedi
+      operationId: registerVote
+      parameters:
+        - name: data
+          in: body
+          description: Vote answers definition
+          schema:
+            required:
+              - answerIds
+            additionalProperties: false
+            properties:
+              answerIds:
+                type: array
+                items: 
+                  type: number
+      responses:
+        200:
+          description: Vote has been Successfully Registered
+          schema:
+            type: object
+        409:
+          description: Vote conflict (answer with ID not exists)
+          schema:
+            $ref: "#/definitions/Error"
+        403:
+          description: |
+            Forbidden voting vote:
+            Reasons:
+            - VOTING_REJECTED dateFrom > now || now > dateTo
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Error"
+
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
 definitions:
-  HelloWorldResponse:
-    required:
-      - message
+  Voting_List:
+    type: object
     properties:
-      message:
+      votings:
+        type: array
+        items:
+          $ref: "#/definitions/Voting"
+      total:
+        type: number
+      offset:
+        type: number
+      limit:
+        type: number
+      nextOffset:
+        type: [number, 'null']
+  
+  Voting:
+    type: object
+    properties:
+      _id:
         type: string
+      name:
+        type: string
+        minLength: 1
+      description:
+        type: string
+      dateFrom:
+        type: string
+        format: date-time
+      dateTo:
+        type: string
+        format: date-time
+      answers:
+        type: array
+        minLength: 1
+        items:
+          $ref: '#/definitions/Answer'
+
+  Answer:
+    type: object
+    required:
+      - _id
+      - text
+    properties:
+      _id:
+        type: number
+      text:
+        type: string
+      totalVotes:
+        type: number
+        description: Pocet hlasov celkove
+    additionalProperties: false
+
   Error:
     required:
       - statusCode
@@ -71,3 +183,10 @@ definitions:
         type: string
         description: Localized info
     additionalProperties: true
+
+parameters:
+  voting_id:
+    in: path
+    type: string
+    name: voting_id
+    required: true
