@@ -65,7 +65,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
   
-  /voting/{voting_id}/vote:
+  /votings/{voting_id}/vote:
     x-swagger-router-controller: public_ctrl
     parameters:
       - $ref: '#/parameters/voting_id'
